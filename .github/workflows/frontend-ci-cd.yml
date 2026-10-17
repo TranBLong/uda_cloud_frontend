@@ -1,0 +1,24 @@
+name: Frontend CI/CD Pipeline
+on:
+  push:
+    branches: ["main"]
+jobs:
+  cd-deploy:
+    name: CD – Deploy Frontend to EC2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/uda_cloud/uda_cloud_frontend
+            git pull
+            cd ~/uda_cloud
+            docker-compose build frontend --no-cache
+            docker-compose up -d
+            docker system prune -f
